@@ -1,0 +1,33 @@
+name: Deploy Tax Backend to the server
+on:
+    # push:
+    #     branches:
+    #     - main
+    workflow_dispatch:
+permissions:
+    contents: read
+concurrency:
+    group: tax-backend-deploy
+    cancel-in-progress: false # dont cancel the current task when something new added 
+jobs:
+  deploy-tax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Ubuntu VPS
+        uses: appleboy/ssh-action@v1 #tool to do ssh commands on the server
+        with:
+            host: ${{ secrets.VPS_HOST }}
+            username: ${{ secrets.VPS_USER }}
+            key: ${{ secrets.VPS_SSH_KEY }}
+            # docker compose log only for logging purpose, not for the deployment
+            #--ff only to avoid merge commits, we want to keep the history clean
+            script: |
+                set -e
+
+                cd /home/abdo/tax-inspection-database-backend
+
+                git pull --ff-only origin main
+
+                docker compose config -q
+                docker compose up -d
+                

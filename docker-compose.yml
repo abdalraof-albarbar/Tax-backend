@@ -17,9 +17,9 @@ services:
       retries: 5
       start_period: 30s
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?set a username}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set a password}
+      POSTGRES_DB: ${POSTGRES_DB:?set a database name}
     ports:
       - "${POSTGRES_PORT}"
     volumes:
@@ -32,8 +32,8 @@ services:
     mem_limit: 512m
     mem_reservation: 128m
     environment:
-     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL?:set an email}
-     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD?:set a password}
+     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:?set an email}
+     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?set a password}
     ports:
     - "${PGADMIN_PORT}"
     volumes:
@@ -41,7 +41,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-          
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.253.250.0/28         
         
 
 volumes:
