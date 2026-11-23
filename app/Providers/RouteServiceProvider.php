@@ -32,6 +32,11 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
+            Route::middleware('api')->prefix('api/flutter')
+                ->group(base_path('routes/flutter.php'));
+
+            Route::middleware('api')->prefix('api/react')
+                ->group(base_path('routes/react.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
