@@ -1,6 +1,9 @@
 name: tax-inspection-database-backend
+
 services:
+
   postgres:
+    
     image: postgis/postgis:17-3.5-alpine # PostgreSQL 17 + PostGIS for maps/GIS
     container_name: tax_database
     restart: unless-stopped
@@ -19,7 +22,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:؟set a username}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB} 
     ports:
       - "${POSTGRES_PORT}"
     volumes:
@@ -47,34 +50,34 @@ networks:
       config:
         - subnet: 10.253.250.0/28         
 
-  laravel-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.laravel-backend
-    container_name: tax_backend
-    restart: unless-stopped
-    cpus: 1.5
-    mem_limit: 1g
-    mem_reservation: 512m
-    environment:
-      APP_ENV: ${APP_ENV:?set an environment}
-      APP_KEY: ${APP_KEY:?set an application key}
-      DEBUG: ${DEBUG:?set debug mode}
-      DB_CONNECTION: ${DB_CONNECTION:?set a database connection type}
-      DB_HOST: ${DB_HOST:?set a database host}
-      DB_PORT: ${DB_PORT:?set a database port}
-      DB_DATABASE: ${DB_DATABASE:?set a database name}
-      DB_USERNAME: ${DB_USERNAME:?set a database username}
-      DB_PASSWORD: ${DB_PASSWORD:?set a database password}
-    ports:
-      - "${LARAVEL_BACKEND_PORT}"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    commands:
-        = php artisan serve --host=0.0.0.0
-        - --port=8000
-
+  # laravel-backend:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.laravel-backend
+  #   container_name: tax_backend
+  #   restart: unless-stopped
+  #   cpus: 1.5
+  #   mem_limit: 1g
+  #   mem_reservation: 512m
+  #   environment:
+  #     APP_ENV: ${APP_ENV:?set an environment}
+  #     APP_KEY: ${APP_KEY:?set an application key}
+  #     DEBUG: ${DEBUG:?set debug mode}
+  #     DB_CONNECTION: ${DB_CONNECTION:?set a database connection type}
+  #     DB_HOST: ${DB_HOST:?set a database host}
+  #     DB_PORT: ${DB_PORT:?set a database port}
+  #     DB_DATABASE: ${DB_DATABASE:?set a database name}
+  #     DB_USERNAME: ${DB_USERNAME:?set a database username}
+  #     DB_PASSWORD: ${DB_PASSWORD:?set a database password}
+  #   ports:
+  #     - "${LARAVEL_BACKEND_PORT}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   commands:
+  #       = php artisan serve --host=0.0.0.0
+  #       - --port=8000
+  
 
 
 

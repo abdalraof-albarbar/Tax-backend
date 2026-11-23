@@ -20,7 +20,7 @@ RUN composer install \
     --prefer-dist \
     --no-interaction \
     --optimize-autoloader
-
+/
 COPY . .
 
 RUN composer dump-autoload \
