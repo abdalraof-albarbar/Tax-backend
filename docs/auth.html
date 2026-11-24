@@ -1,0 +1,339 @@
+<title>Tax Backend Auth</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Readex+Pro:wght@500;600&display=swap">
+<style>
+/* Layout: single reading column, numbered steps only where order matters, code always LTR */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#1b2230; --muted:#5b6578; --line:#dfe3ea;
+  --accent:#9a6411; --accent-bg:#fbf1df; --code-bg:#eef1f5;
+  --ok:#1f7a4d; --ok-bg:#e3f4eb; --bad:#b42a2a; --bad-bg:#fbe7e7; --warn:#8a5a00; --warn-bg:#fff3d6;
+  --f-display:"Readex Pro","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161d; --surface:#1a2029; --fg:#e6e9ef; --muted:#9aa4b5; --line:#2c3441;
+  --accent:#e0a64a; --accent-bg:#3a2c14; --code-bg:#222a35;
+  --ok:#5fcf95; --ok-bg:#163326; --bad:#f08a8a; --bad-bg:#3a1c1c; --warn:#f0c060; --warn-bg:#3a2f12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161d; --surface:#1a2029; --fg:#e6e9ef; --muted:#9aa4b5; --line:#2c3441;
+  --accent:#e0a64a; --accent-bg:#3a2c14; --code-bg:#222a35;
+  --ok:#5fcf95; --ok-bg:#163326; --bad:#f08a8a; --bad-bg:#3a1c1c; --warn:#f0c060; --warn-bg:#3a2f12; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.8;direction:rtl}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.35;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+h2{font-size:1.35rem;display:flex;gap:10px;align-items:baseline}
+h2 .n{font-family:var(--f-mono);font-size:.85rem;color:var(--accent)}
+h3{font-size:1.05rem}
+p{margin:0;max-width:65ch}
+section{display:flex;flex-direction:column;gap:14px}
+.lead{color:var(--muted);font-size:1.05rem}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--code-bg);padding:1px 6px;border-radius:4px;direction:ltr;unicode-bidi:isolate}
+pre{margin:0;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;direction:ltr;text-align:left;font-family:var(--f-mono);font-size:.84rem;line-height:1.65}
+pre code{background:none;padding:0;font-size:inherit}
+.c{color:var(--muted)}
+.del{color:var(--bad)} .add{color:var(--ok)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.94rem}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-weight:600;color:var(--muted);font-size:.85rem;background:var(--bg)}
+.note{border:1px solid var(--line);border-inline-start:4px solid var(--accent);border-radius:0;background:var(--accent-bg);padding:12px 16px;max-width:none}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:.78rem;padding:1px 8px;border-radius:99px;font-weight:500;direction:ltr}
+.p200{background:var(--ok-bg);color:var(--ok)} .p401{background:var(--bad-bg);color:var(--bad)} .p403{background:var(--warn-bg);color:var(--warn)}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.step b{font-family:var(--f-display);font-weight:600}
+.step span{color:var(--muted);font-size:.9rem}
+.step .k{font-family:var(--f-mono);font-size:.75rem;color:var(--accent)}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.sim{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:6px 12px;cursor:pointer}
+.opts button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg);color:var(--fg)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.trace{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.trace li{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;background:var(--bg)}
+.trace li .m{font-family:var(--f-mono);font-size:.8rem;min-width:22px;color:var(--muted)}
+.trace li.fail{background:var(--bad-bg)} .trace li.okk{background:var(--ok-bg)} .trace li.skip{opacity:.45}
+.result{font-family:var(--f-mono);direction:ltr;text-align:left;font-size:.85rem}
+ul.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+ul.check li{display:flex;gap:10px}
+ul.check li::before{content:"";flex:none;width:14px;height:14px;margin-top:7px;border:1.5px solid var(--accent);border-radius:3px}
+ul.check li.done::before{background:var(--accent)}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){.trace li{transition:background .25s,opacity .25s}}
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:10px">
+  <h1>الـ Auth في Tax Backend</h1>
+  <p class="lead">كيف المفتش يدخل من Flutter والمشرف يدخل من React بنفس الطريقة: <b>Laravel Sanctum API Tokens</b>. الصفحة هذي تشرح الفكرة، والجداول، وكل خطوة تكتبها، والأماكن اللي يتشيك فيها <code>is_active</code> والـ role.</p>
+</header>
+
+<section>
+  <h2><span class="n">00</span>الفكرة في سطرين</h2>
+  <p>المستخدم يبعت الإيميل وكلمة السر <b>مرة وحدة</b>، فيرجعله Laravel <b>توكن</b> (زي كرت دخول). بعدها كل طلب يبعت معاه الكرت في الـ header، وLaravel يعرف مين هو بدون ما يطلب كلمة السر مرة ثانية.</p>
+<pre><code>Authorization: Bearer 7|Xk2pQ9...
+Accept: application/json</code></pre>
+  <div class="tbl"><table>
+    <tr><th>الطريقة</th><th>لمين</th><th>قرارنا</th></tr>
+    <tr><td>API Tokens (Bearer)</td><td>موبايل وأي frontend</td><td><span class="pill p200">للاثنين</span></td></tr>
+    <tr><td>SPA cookies (session + CSRF)</td><td>React على نفس الدومين بس</td><td><span class="pill p403">لا</span> معقدة وما تخدمش مع Flutter</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">01</span>الفلو من فتح التطبيق</h2>
+  <p>الترتيب هنا مهم، فالخطوات مرقمة. الـ login <b>ما يحتاجش توكن</b>، والتحقق من التوكن يصير بـ <code>/me</code>.</p>
+  <div class="flow">
+    <div class="step"><span class="k">1</span><b>فتح التطبيق</b><span>عنده توكن محفوظ؟ لو لا، يمشي لشاشة الدخول.</span></div>
+    <div class="step"><span class="k">2</span><b>GET /me</b><span>مع التوكن. <span class="pill p200">200</span> داخل. <span class="pill p401">401</span> يمسح التوكن ويمشي للدخول.</span></div>
+    <div class="step"><span class="k">3</span><b>POST /login</b><span>إيميل + كلمة سر، <b>بدون</b> توكن. يرجّع توكن جديد.</span></div>
+    <div class="step"><span class="k">4</span><b>يحفظ التوكن</b><span>Flutter: <code>flutter_secure_storage</code>. React: الذاكرة أو <code>localStorage</code>.</span></div>
+    <div class="step"><span class="k">5</span><b>كل طلب</b><span><code>auth:sanctum</code> ← <code>active</code> ← <code>role</code> ← الكنترولر.</span></div>
+    <div class="step"><span class="k">6</span><b>POST /logout</b><span>يمسح التوكن الحالي من الداتا بيس.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">02</span>جرّب: شن يصير للطلب؟</h2>
+  <p>اختار حالة، وشوف من أنهي بوابة يمر الطلب <code>GET /api/flutter/visits</code> ووين يوقف.</p>
+  <div class="sim">
+    <div class="opts" role="group" aria-label="الحالة">
+      <button type="button" id="s-ok" data-s="ok" aria-pressed="true">مفتش، توكن صالح</button>
+      <button type="button" id="s-none" data-s="none" aria-pressed="false">بدون توكن</button>
+      <button type="button" id="s-dead" data-s="dead" aria-pressed="false">توكن ممسوح (logout)</button>
+      <button type="button" id="s-off" data-s="off" aria-pressed="false">حساب مقفول is_active=false</button>
+      <button type="button" id="s-role" data-s="role" aria-pressed="false">مشرف يحاول من Flutter</button>
+    </div>
+    <ol class="trace" id="trace"></ol>
+    <div class="result" id="result"></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>الجداول</h2>
+  <h3>users: الأعمدة الجديدة</h3>
+  <div class="tbl"><table>
+    <tr><th>العمود</th><th>ليش</th><th>في $fillable؟</th></tr>
+    <tr><td><code>is_active</code> default true</td><td>تقفل الحساب بدون ما تمسحه، وتقعد زياراته وتقاريره</td><td>لا</td></tr>
+    <tr><td><code>must_change_password</code> default true</td><td>المشرف يحط كلمة سر مؤقتة، والمستخدم يغيّرها أول دخول</td><td>لا</td></tr>
+    <tr><td><code>last_login_at</code> nullable</td><td>تعرف مين يستعمل التطبيق</td><td>لا</td></tr>
+    <tr><td><code>timestamps()</code></td><td>امتى تعمل الحساب وامتى تعدّل</td><td>تلقائي</td></tr>
+    <tr><td><code>role</code></td><td>admin / supervisor / inspector</td><td>لا، يتحط في الكود</td></tr>
+  </table></div>
+
+  <h3>personal_access_tokens: علاقة 1 لـ N</h3>
+  <p>كل login يعمل <b>صف جديد</b>. مفتش دخل من تليفونين يكون عنده توكنين، والاثنين يأشّروا على نفس <code>users.id</code>.</p>
+<pre><code>users                     personal_access_tokens
+id=2  ───────────┬──────► id=1  tokenable_id=2  name=flutter
+                 ├──────► id=7  tokenable_id=2  name=flutter   <span class="c">(second phone)</span>
+                 └──────► id=9  tokenable_id=2  name=flutter</code></pre>
+  <p>Sanctum يعمل الربط بـ <code>morphs('tokenable')</code>، يعني عمودين (<code>tokenable_type</code> و<code>tokenable_id</code>) <b>بدون FK حقيقي</b>، فلو انمسح المستخدم تقعد توكناته يتيمة. وعندنا <code>User</code> بس ياخذ توكنات، فنزيد FK مع cascade، ونخلي الأسماء كما هي لأن Sanctum يدوّر عليها بالاسم:</p>
+<pre><code><span class="c">// بعد: php artisan vendor:publish --tag=sanctum-migrations</span>
+Schema::create('personal_access_tokens', function (Blueprint $table) {
+    $table->id();
+<span class="del">-   $table->morphs('tokenable');</span>
+<span class="add">+   $table->string('tokenable_type');</span>
+<span class="add">+   $table->foreignId('tokenable_id')->constrained('users')->cascadeOnDelete();</span>
+<span class="add">+   $table->index(['tokenable_type', 'tokenable_id']);</span>
+    $table->text('name');
+    $table->string('token', 64)->unique();   <span class="c">// hash, not the plain token</span>
+    $table->text('abilities')->nullable();
+    $table->timestamp('last_used_at')->nullable();
+    $table->timestamp('expires_at')->nullable()->index();
+    $table->timestamps();
+});</code></pre>
+</section>
+
+<section>
+  <h2><span class="n">04</span>الـ Routes لكل تطبيق</h2>
+  <div class="tbl"><table>
+    <tr><th>الملف</th><th>Route</th><th>الحماية</th></tr>
+    <tr><td rowspan="2"><code>routes/flutter.php</code></td><td><code>POST /api/flutter/login</code></td><td>مفتوح + <code>throttle:5,1</code></td></tr>
+    <tr><td><code>/logout</code>, <code>/me</code>, وباقي الـ API</td><td><code>auth:sanctum</code>, <code>active</code>, <code>role:inspector</code></td></tr>
+    <tr><td rowspan="2"><code>routes/react.php</code></td><td><code>POST /api/react/login</code></td><td>مفتوح + <code>throttle:5,1</code></td></tr>
+    <tr><td><code>/logout</code>, <code>/me</code>, وباقي الـ API</td><td><code>auth:sanctum</code>, <code>active</code>, <code>role:supervisor,admin</code></td></tr>
+  </table></div>
+<pre><code><span class="c">// routes/flutter.php</span>
+Route::post('login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->defaults('app', 'flutter');
+
+Route::middleware(['auth:sanctum', 'active', 'role:inspector'])->group(function () {
+    Route::get('me', [AuthController::class, 'me']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    <span class="c">// visits, reports ...</span>
+});</code></pre>
+</section>
+
+<section>
+  <h2><span class="n">05</span>الـ login خطوة خطوة</h2>
+<pre><code>public function login(Request $request)
+{
+    $data = $request->validate([
+        'email'    => ['required', 'email'],
+        'password' => ['required', 'string'],
+    ]);
+
+    $user = User::where('email', $data['email'])->first();
+
+    <span class="c">// 1. same message for wrong email or wrong password</span>
+    if (! $user || ! Hash::check($data['password'], $user->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    <span class="c">// 2. account switched off</span>
+    if (! $user->is_active) {
+        return response()->json(['message' => 'Account disabled'], 403);
+    }
+
+    <span class="c">// 3. role must match the app</span>
+    $app     = $request->route()->defaults['app'];          <span class="c">// flutter | react</span>
+    $allowed = $app === 'flutter' ? ['inspector'] : ['supervisor', 'admin'];
+    if (! in_array($user->role, $allowed)) {
+        return response()->json(['message' => 'Use the other app'], 403);
+    }
+
+    <span class="c">// 4. one session per app (optional): drop the old token</span>
+    $user->tokens()->where('name', $app)->delete();
+
+    <span class="c">// 5. new token + last login</span>
+    $token = $user->createToken($app, [$user->role])->plainTextToken;
+    $user->forceFill(['last_login_at' => now()])->save();
+
+    return response()->json([
+        'token'                => $token,
+        'user'                 => $user->load('employee'),
+        'must_change_password' => $user->must_change_password,
+    ]);
+}</code></pre>
+  <p class="note">رسالة الخطأ وحدة للإيميل الغلط وكلمة السر الغلط، عشان ما حدش يقدر يعرف أنهي إيميلات موجودة. و<code>forceFill</code> لأن <code>last_login_at</code> مش في <code>$fillable</code>.</p>
+<pre><code>public function me(Request $request)
+{
+    return $request->user()->load('employee');
+}
+
+public function logout(Request $request)
+{
+    $request->user()->currentAccessToken()->delete();   <span class="c">// this device only</span>
+    return response()->noContent();
+}</code></pre>
+</section>
+
+<section>
+  <h2><span class="n">06</span>is_active: ثلاث بوابات</h2>
+  <p>قفل الحساب وحده ما يطلّعش المستخدم، لأن التوكنات القديمة لسا صالحة. عشان هذا الشرط يتحط في ثلاث أماكن، وكل وحدة تسكّر باب:</p>
+  <div class="gates">
+    <div class="step"><b>في الـ login</b><span><code>if (! $user->is_active)</code> ← <span class="pill p403">403</span>. يمنع دخول جديد.</span></div>
+    <div class="step"><b>وقت القفل</b><span><code>$user->tokens()->delete()</code> مع <code>is_active = false</code>. يطلّعه من كل الأجهزة فوراً.</span></div>
+    <div class="step"><b>middleware active</b><span>على كل route محمي. احتياط لو حد قفل الحساب من pgAdmin مباشرة.</span></div>
+  </div>
+<pre><code><span class="c">// app/Http/Middleware/EnsureUserIsActive.php</span>
+public function handle(Request $request, Closure $next)
+{
+    if (! $request->user()?->is_active) {
+        $request->user()?->currentAccessToken()?->delete();
+        return response()->json(['message' => 'Account disabled'], 403);
+    }
+    return $next($request);
+}
+
+<span class="c">// app/Http/Middleware/EnsureRole.php   usage: role:inspector  or  role:supervisor,admin</span>
+public function handle(Request $request, Closure $next, string ...$roles)
+{
+    if (! in_array($request->user()->role, $roles)) {
+        return response()->json(['message' => 'Forbidden'], 403);
+    }
+    return $next($request);
+}
+
+<span class="c">// app/Http/Kernel.php  ($middlewareAliases or $routeMiddleware)</span>
+'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+'role'   => \App\Http\Middleware\EnsureRole::class,</code></pre>
+</section>
+
+<section>
+  <h2><span class="n">07</span>أكواد الرد</h2>
+  <div class="tbl"><table>
+    <tr><th>الكود</th><th>متى</th><th>التطبيق يدير</th></tr>
+    <tr><td><span class="pill p200">200</span></td><td>كل شي تمام</td><td>يكمّل</td></tr>
+    <tr><td><span class="pill p401">401</span></td><td>بدون توكن، توكن غلط، ممسوح، أو منتهي. أو كلمة سر غلط في الـ login</td><td>يمسح التوكن ويرجع لشاشة الدخول</td></tr>
+    <tr><td><span class="pill p403">403</span></td><td>الحساب مقفول، أو الـ role ما يناسبش التطبيق</td><td>يوري رسالة، وما يعاودش يحاول</td></tr>
+    <tr><td><span class="pill p403">422</span></td><td>الإيميل أو كلمة السر ناقصين في الـ login</td><td>يوري أخطاء الحقول</td></tr>
+    <tr><td><span class="pill p403">429</span></td><td>محاولات login كثيرة (throttle)</td><td>يستنى دقيقة</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">08</span>إعدادات صغيرة مهمة</h2>
+  <div class="tbl"><table>
+    <tr><th>الإعداد</th><th>وين</th><th>ليش</th></tr>
+    <tr><td><code>Accept: application/json</code></td><td>كل طلب من التطبيقين</td><td>بدونه Laravel يحاول يحوّلك لصفحة login HTML بدل 401</td></tr>
+    <tr><td><code>expiration</code></td><td><code>config/sanctum.php</code></td><td>توا <code>null</code>، يعني التوكن ما ينتهيش. أو تحط <code>expires_at</code> لكل توكن في <code>createToken</code></td></tr>
+    <tr><td><code>allowed_origins</code></td><td><code>config/cors.php</code></td><td>توا <code>*</code>. في الإنتاج حط دومين React بس</td></tr>
+    <tr><td>الـ route التجريبي</td><td><code>routes/api.php</code></td><td>يضيف مستخدم بكلمة سر نص عادي. امسحه قبل ما تفتح الـ API</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">09</span>ترتيب الشغل</h2>
+  <ul class="check">
+    <li class="done">Sanctum مركّب، و<code>HasApiTokens</code> في <code>User</code></li>
+    <li class="done">أعمدة <code>is_active</code> و<code>must_change_password</code> و<code>last_login_at</code> و<code>timestamps</code> في ملف <code>users</code></li>
+    <li><code>vendor:publish --tag=sanctum-migrations</code> وتعديل الـ FK مع cascade</li>
+    <li><code>migrate:fresh</code> (يمسح بيانات السيرفر، ويطبق <code>employee_no</code> و<code>users</code> والتوكنز مع بعض)</li>
+    <li>casts في <code>User</code>: <code>is_active</code> و<code>must_change_password</code> boolean، و<code>last_login_at</code> datetime</li>
+    <li>Seeder لأول مشرف، والبيانات من <code>.env</code></li>
+    <li><code>AuthController</code>: login و me و logout</li>
+    <li>Middleware <code>active</code> و<code>role</code>، وتسجيلهم في <code>Kernel.php</code></li>
+    <li>Routes في <code>flutter.php</code> و<code>react.php</code></li>
+    <li>تجربة بـ Postman: login ← me ← logout ← me (لازم 401)</li>
+  </ul>
+</section>
+
+<footer>مرجع لمشروع Tax-backend. Laravel 13 · Sanctum 4 · PostgreSQL. الكود في الصفحة أمثلة تكتبها انت وتعدّلها حسب مشروعك.</footer>
+</div>
+
+<script>
+const S={
+  ok:  {fail:null, res:'200 OK  { "data": [ ...visits ] }'},
+  none:{fail:0,   res:'401 Unauthorized  { "message": "Unauthenticated." }'},
+  dead:{fail:0,   res:'401 Unauthorized  { "message": "Unauthenticated." }'},
+  off: {fail:1,   res:'403 Forbidden  { "message": "Account disabled" }'},
+  role:{fail:2,   res:'403 Forbidden  { "message": "Forbidden" }'}
+};
+const why={
+  none:'ما فيش header Authorization',
+  dead:'التوكن مش موجود في personal_access_tokens',
+  off:'is_active = false، والتوكن الحالي ينمسح',
+  role:'role = supervisor، والمطلوب inspector'
+};
+const gates=[
+  ['auth:sanctum','يدوّر على التوكن في personal_access_tokens'],
+  ['active','يشيك users.is_active'],
+  ['role:inspector','يشيك users.role'],
+  ['VisitController','يرجّع البيانات']
+];
+function render(s){
+  document.querySelectorAll('.opts button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===s?'true':'false'));
+  const t=document.getElementById('trace');t.innerHTML='';
+  const f=S[s].fail;
+  gates.forEach((g,i)=>{
+    const li=document.createElement('li');
+    let cls='okk',txt=g[1];
+    if(f!==null&&i===f){cls='fail';txt=why[s];}
+    else if(f!==null&&i>f){cls='skip';txt='ما يوصلش هنا';}
+    li.className=cls;
+    li.innerHTML='<span class="m">'+(i+1)+'</span><span><code>'+g[0]+'</code> '+txt+'</span>';
+    t.appendChild(li);
+  });
+  document.getElementById('result').textContent='← '+S[s].res;
+}
+document.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>render(b.dataset.s)));
+render('ok');
+</script>
