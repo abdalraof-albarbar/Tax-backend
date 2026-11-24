@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('risk_level')->nullable();
             $table->string('tax_number');
             $table->foreign('tax_number')->references('tax_number')->on('businesses');
-            $table->string('inspector_no');
-            $table->foreign('inspector_no')->references('employee_no')->on('inspectors');
+            $table->string('employee_no');
+            $table->foreign('employee_no')->references('employee_no')->on('employees');
         });
     }
 

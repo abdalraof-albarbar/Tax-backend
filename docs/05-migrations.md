@@ -28,6 +28,14 @@ php artisan make:migration create_regions_table
 | `php artisan migrate:rollback` | يرجّع آخر دفعة (batch) بتشغيل `down()` |
 | `php artisan migrate:fresh` | ⚠️ يمسح **كل** الجداول ويعاود ينشئهم (البيانات تضيع) |
 
+### refresh قدام fresh
+```
+migrate:refresh = down() لكل ملف بالعكس، بعدين up() لكلهم   ← الأبطأ، ويحتاج down() صحيح
+migrate:fresh   = DROP لكل الجداول مرة وحدة، بعدين up()      ← أسرع
+```
+الاثنين **يمسحوا كل البيانات**. عندنا بطيئين زيادة لأن `.env` على داتا بيس السيرفر عن طريق نفق SSH،
+وكل أمر SQL يمشي ويرجع في الشبكة. الحل: داتا بيس محلية (شوف `problems/004`).
+
 Laravel يسجّل الملفات اللي اتنفّذت في جدول اسمه `migrations`. عشان هذا تعديل
 ملف قديم ما يأثرش لين تعمل rollback أو fresh.
 
@@ -50,3 +58,12 @@ Schema::table('users', function (Blueprint $table) {
 |---|---|
 | `SQLSTATE[42701] duplicate column name` | عمود مكتوب مرتين في نفس الجدول |
 | `down()` يحذف اسم غلط (`visit` بدل `visits`) | لازم `dropIfExists` بنفس اسم الجدول في `up()` |
+| `column "user_id" referenced in foreign key constraint does not exist` | `constrained('users', 'user_id')`، والمفتاح في `users` اسمه `id`. الصح `constrained('users')` |
+| `incompatible types: bigint and character varying` | `foreignId` (رقم) يأشّر على مفتاح نص. الصح `string` + `foreign()` |
+| `SQLSTATE[42830] there is no unique constraint matching given keys` | FK ذاتي داخل `Schema::create` قبل ما الـ primary key النصي يتعمل. الصح تحطه في `Schema::table` منفصل |
+| `relation "regions" already exists` | مسحت ملف migration قديم وعملت واحد جديد باسم مختلف، والجدول لسا في الداتا بيس |
+
+## تعديل ملف migration بعد ما تنفّذ
+`migrate:status` يقول `Ran`، يعني الجدول في الداتا بيس بالشكل القديم. تعديل الملف **وحده ما يغيّرش شي**.
+- **في التطوير (ما فيش بيانات مهمة):** `php artisan migrate:fresh` ⚠️ يمسح الكل ويعاود يبني من الملفات.
+- **لو فيه بيانات:** migration جديدة تعدّل، مثلاً `$table->renameColumn('employee_No', 'employee_no');`.

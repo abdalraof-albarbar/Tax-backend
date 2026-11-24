@@ -20,6 +20,13 @@ protected $keyType = 'string';          // نوعه نص
 ```
 ولما يكون رقم تلقائي لكن باسم ثاني (مثل `region_id`)، تكفي `$primaryKey`.
 
+مثال: `Employee` مفتاحه `employee_no` (نص)، فيحتاج الثلاث سطور.
+
+## الـ Models توا
+`User` و`Employee` (بدل `Inspector` و`Supervisor`) و`Region` و`Business` و`TaxDeclaration` و`Visit`
+و`Report` و`ReportPhoto` و`ReportDocument` و`ViolationType`. `report_violations` ما عنده موديل.
+`employees` فيه `timestamps()`، فـ `Employee` **ما يحتاجش** `$timestamps = false`، والباقين يحتاجوه.
+
 ## بدون timestamps
 الجداول عندنا ما فيهاش `created_at` و`updated_at`، فلازم:
 ```php

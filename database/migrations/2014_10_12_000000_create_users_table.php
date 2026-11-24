@@ -11,10 +11,10 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id()->primary();
-            $table->string('name')->nullable();
+            $table->string('name');
             $table->string('email')->unique();
-          $table->enum('role', ['supervisor', 'inspector'])->nullable();
-            $table->string('password')->nullable();
+          $table->enum('role', ['admin', 'supervisor', 'inspector']);
+            $table->string('password');
             
     
         });

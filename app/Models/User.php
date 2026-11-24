@@ -15,6 +15,7 @@ public $timestamps = false;
         'name',
         'email',
         'password',
+        
     
     ];
 
