@@ -15,5 +15,7 @@
 | 8 | [08-relations.md](08-relations.md) | العلاقات بين الـ Models |
 | 9 | [09-raw-sql.md](09-raw-sql.md) | كتابة SQL بإيدك داخل Laravel |
 | 10 | [10-todo.md](10-todo.md) | الحاجات الباقية |
+| 11 | [11-n-plus-one.md](11-n-plus-one.md) | مشكلة N+1 وحلها بـ `with()` |
 
 ورسمة الـ ERD موجودة في [tax-erd.pdf](tax-erd.pdf).
+المشاكل اللي نلقوها في الكود تنحفظ في مجلد [../problems](../problems/README.md).
