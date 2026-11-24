@@ -63,3 +63,45 @@ Inspector::with('region')->get(); // يجيب المناطق مع المفتشي
 
 ## الترتيب
 أنشئ الجداول (migrations) أولاً، بعدين اكتب العلاقات. العلاقات كود PHP بس، وما تغيّرش الداتا بيس.
+
+## خريطة العلاقات في مشروعنا
+| من | إلى | النوع | الدالة في الأب | الدالة في الابن |
+|---|---|---|---|---|
+| User | Supervisor | 1 : 0..1 | `supervisor()` hasOne | `user()` belongsTo |
+| User | Inspector | 1 : 0..1 | `inspector()` hasOne | `user()` belongsTo |
+| Supervisor | Inspector | 1 : N | `inspectors()` hasMany | `supervisor()` belongsTo |
+| Region | Inspector | 1 : N | `inspectors()` hasMany | `region()` belongsTo |
+| Region | Business | 1 : N | `businesses()` hasMany | `region()` belongsTo |
+| Business | TaxDeclaration | 1 : N | `taxDeclarations()` hasMany | `business()` belongsTo |
+| Business | Visit | 1 : N | `visits()` hasMany | `business()` belongsTo |
+| Inspector | Visit | 1 : N | `visits()` hasMany | `inspector()` belongsTo |
+| Visit | Report | 1 : 0..1 | `report()` hasOne | `visit()` belongsTo |
+| Report | ReportPhoto | 1 : N | `photos()` hasMany | `report()` belongsTo |
+| Report | ReportDocument | 1 : N | `documents()` hasMany | `report()` belongsTo |
+| Report | ViolationType | N : M | `violationTypes()` belongsToMany | `reports()` belongsToMany |
+
+**قاعدة سهلة:** الجدول اللي فيه عمود الـ FK ياخذ `belongsTo`، والجدول الثاني ياخذ `hasOne` أو `hasMany`.
+لو الـ FK عليه `unique` تكون `hasOne`، ولو بدونه تكون `hasMany`.
+
+## نصائح
+1. **اكتب العلاقة من الطرفين** (`hasMany` في الأب و`belongsTo` في الابن)، عشان تقدر تمشي في الاتجاهين.
+2. **اسم الدالة:** مفرد لـ `belongsTo`/`hasOne` (`region()`)، وجمع لـ `hasMany`/`belongsToMany` (`visits()`).
+3. **أسماء المفاتيح المخصصة:** كل ما يكون المفتاح مش `id`، اكتب المفتاحين صراحة. عندنا تقريباً كل العلاقات تحتاج هذا.
+4. **تجنب مشكلة N+1:** لما تجيب قائمة وتحتاج علاقاتها، استعمل `with()`:
+   ```php
+   Visit::with(['business', 'inspector.user', 'report.photos'])->get();
+   ```
+   بدون `with`، كل زيارة تعمل استعلام لوحدها (100 زيارة = 101 استعلام).
+5. **cascade بحذر:** خليناه بس للصور والمستندات والمخالفات (توابع التقرير). ما تحطهوش على `businesses` أو `inspectors`، باش ما تنحذفش بيانات مهمة بالغلط.
+6. **أضف index لأعمدة الـ FK.** PostgreSQL ما يعملهمش تلقائياً، والبحث بيها (مثل زيارات مفتش) يصير أسرع.
+7. **الجدول الوسيط** ما يحتاجش موديل. استعمل `attach` و`detach` و`sync`:
+   ```php
+   $report->violationTypes()->sync([1, 3]);   // يخلي المخالفات 1 و3 بس
+   ```
+8. **جرّب العلاقات في tinker** قبل ما تكتب الكنترولر:
+   ```powershell
+   php artisan tinker
+   ```
+   ```php
+   Inspector::first()->region
+   ```
