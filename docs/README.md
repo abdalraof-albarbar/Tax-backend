@@ -17,6 +17,7 @@
 | 10 | [10-todo.md](10-todo.md) | الحاجات الباقية |
 | 11 | [11-n-plus-one.md](11-n-plus-one.md) | مشكلة N+1 وحلها بـ `with()` |
 | 12 | [12-auth-tokens.pdf](12-auth-tokens.pdf) | توكنات Sanctum: إنشاء الجدول، `morphs`، `abilities`، والـ flow بالرسم (المصدر: [12-auth-tokens.html](12-auth-tokens.html)) |
+| 13 | [13-tokens-flow.html](13-tokens-flow.html) | رحلة التوكن بالأنيميشن: 4 سيناريوهات (login، طلب، توكن غلط، logout) والجداول تتغيّر، ومعنى كل عمود |
 | - | [auth.html](auth.html) | صفحة شرح الـ auth كاملة (Flutter وReact) |
 
 ورسمة الـ ERD موجودة في [tax-erd.pdf](tax-erd.pdf).
