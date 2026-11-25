@@ -16,6 +16,8 @@
 | 9 | [09-raw-sql.md](09-raw-sql.md) | كتابة SQL بإيدك داخل Laravel |
 | 10 | [10-todo.md](10-todo.md) | الحاجات الباقية |
 | 11 | [11-n-plus-one.md](11-n-plus-one.md) | مشكلة N+1 وحلها بـ `with()` |
+| 12 | [12-auth-tokens.pdf](12-auth-tokens.pdf) | توكنات Sanctum: إنشاء الجدول، `morphs`، `abilities`، والـ flow بالرسم (المصدر: [12-auth-tokens.html](12-auth-tokens.html)) |
+| - | [auth.html](auth.html) | صفحة شرح الـ auth كاملة (Flutter وReact) |
 
 ورسمة الـ ERD موجودة في [tax-erd.pdf](tax-erd.pdf).
 المشاكل اللي نلقوها في الكود تنحفظ في مجلد [../problems](../problems/README.md).

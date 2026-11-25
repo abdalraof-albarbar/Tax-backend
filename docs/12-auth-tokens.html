@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Sanctum tokens</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  :root {
+    --ink: #1f1f1d; --muted: #5f5e5a; --line: #d3d1c7; --soft: #f6f5f0;
+    --teal-50: #e1f5ee; --teal-600: #0f6e56; --teal-800: #085041;
+    --coral-50: #faece7; --coral-600: #993c1d; --coral-800: #712b13;
+    --amber-50: #faeeda; --amber-600: #854f0b; --amber-800: #633806;
+    --purple-50: #eeedfe; --purple-600: #534ab7; --purple-800: #3c3489;
+    --red-50: #fcebeb; --red-800: #791f1f;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: var(--ink); font-size: 12.5pt; line-height: 1.75; margin: 0; background: #fff; }
+  h1 { font-size: 24pt; margin: 0 0 4px; font-weight: 600; }
+  h2 { font-size: 16pt; margin: 28px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--teal-600); color: var(--teal-800); font-weight: 600; break-after: avoid; }
+  h3 { font-size: 13pt; margin: 18px 0 6px; font-weight: 600; break-after: avoid; }
+  p { margin: 6px 0; }
+  .sub { color: var(--muted); margin-bottom: 18px; }
+  code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 10.5pt; background: var(--soft); padding: 1px 5px; border-radius: 4px; direction: ltr; unicode-bidi: isolate; display: inline-block; max-width: 100%; overflow-wrap: anywhere; line-height: 1.5; }
+  pre { direction: ltr; text-align: left; font-family: Consolas, "Cascadia Mono", monospace; font-size: 10pt; line-height: 1.55; background: #1f2430; color: #e6e6e6; padding: 12px 14px; border-radius: 8px; margin: 8px 0 12px; white-space: pre-wrap; }
+  pre .c { color: #8fbf8f; font-family: "Segoe UI", Tahoma, sans-serif; } pre .k { color: #ffcb6b; } pre .s { color: #c3e88d; } pre .d { color: #f07178; } pre .a { color: #89ddff; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 11pt; }
+  tr { break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: right; }
+  th { background: var(--soft); font-weight: 600; }
+  .note { border: 1px solid var(--line); border-right: 5px solid var(--teal-600); background: var(--teal-50); padding: 10px 14px; border-radius: 6px; margin: 10px 0; break-inside: avoid; }
+  .warn { border: 1px solid #f0997b; border-right: 5px solid var(--coral-600); background: var(--coral-50); padding: 10px 14px; border-radius: 6px; margin: 10px 0; break-inside: avoid; }
+  .fig { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin: 10px 0 6px; break-inside: avoid; }
+  .cap { text-align: center; color: var(--muted); font-size: 10.5pt; margin-bottom: 12px; }
+  .toc { columns: 2; background: var(--soft); border-radius: 8px; padding: 10px 28px; margin: 10px 0 20px; font-size: 11.5pt; }
+  .toc li { margin: 2px 0; }
+  .page-break { break-before: page; }
+  svg { direction: ltr; unicode-bidi: isolate; }
+  svg text { font-family: "Segoe UI", Arial, sans-serif; direction: ltr; }
+  code { text-align: left; }
+  table { break-before: auto; }
+  h2 + table, h2 + p, h3 + ol { break-before: avoid; }
+  svg .t { font-size: 13px; fill: #1f1f1d; }
+  svg .th { font-size: 13px; font-weight: 600; fill: #1f1f1d; }
+  svg .ts { font-size: 11.5px; fill: #444441; }
+  svg .box { fill: #f1efe8; stroke: #888780; stroke-width: .6; }
+  svg .teal { fill: #e1f5ee; stroke: #0f6e56; stroke-width: .6; }
+  svg .coral { fill: #faece7; stroke: #993c1d; stroke-width: .6; }
+  svg .amber { fill: #faeeda; stroke: #854f0b; stroke-width: .6; }
+  svg .purple { fill: #eeedfe; stroke: #534ab7; stroke-width: .6; }
+  svg .arr { stroke: #5f5e5a; stroke-width: 1.3; fill: none; }
+  svg .life { stroke: #b4b2a9; stroke-width: .8; stroke-dasharray: 4 4; }
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps li { counter-increment: s; position: relative; padding-right: 34px; margin: 6px 0; break-inside: avoid; }
+  .steps li::before { content: counter(s); position: absolute; right: 0; top: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--teal-600); color: #fff; font-size: 10.5pt; text-align: center; line-height: 24px; }
+</style>
+</head>
+<body>
+
+<h1>التوكنات في Laravel Sanctum</h1>
+<div class="sub">جدول <code>personal_access_tokens</code>: كيف ينعمل، كيف مربوط بـ <code>users</code>، وكيف يشتغل مع كل طلب. مشروع Tax-backend (Flutter للمفتشين، React للمشرفين).</div>
+
+<ol class="toc">
+  <li>الفكرة في جملة</li>
+  <li>إنشاء الجدول</li>
+  <li>أعمدة الجدول</li>
+  <li><code>morphs</code> والعلاقة مع <code>users</code></li>
+  <li>العلاقة 1 لـ N في الكود</li>
+  <li><code>abilities</code> (الصلاحيات)</li>
+  <li>الـ login خطوة بخطوة</li>
+  <li>أي طلب بعد الـ login</li>
+  <li>الـ logout والإيقاف</li>
+  <li>ربط حقيقي بـ cascade (اختياري)</li>
+  <li>الأمان وأكواد الرد</li>
+  <li>الخلاصة</li>
+</ol>
+
+<h2>1. الفكرة في جملة</h2>
+<p>التوكن زي <b>كرت الغرفة في الفندق</b>. تعطي هويتك (الإيميل وكلمة السر) مرة وحدة في الاستقبال، وياخذ كرت. بعدها تفتح الباب بالكرت بس، وما تعاودش تعطي هويتك.</p>
+<table>
+  <tr><th>الفندق</th><th>مشروعنا</th></tr>
+  <tr><td>الاستقبال</td><td><code>POST /login</code></td></tr>
+  <tr><td>الكرت</td><td>التوكن <code>12|abc...</code></td></tr>
+  <tr><td>دفتر الفندق اللي فيه الكروت</td><td>جدول <code>personal_access_tokens</code></td></tr>
+  <tr><td>تفتح باب الغرفة</td><td>أي طلب فيه <code>Authorization: Bearer 12|abc...</code></td></tr>
+  <tr><td>تسليم الكرت عند الخروج</td><td><code>POST /logout</code> يمسح الصف</td></tr>
+  <tr><td>الفندق يلغي كل كروتك</td><td><code>$user->tokens()->delete()</code></td></tr>
+</table>
+
+<h2>2. إنشاء الجدول</h2>
+<p>Sanctum يجي ومعاه ملف الـ migration، لكنه داخل <code>vendor</code>. من Sanctum 4، Laravel ما يشغّلهش من هناك، فلازم تنسخه لمشروعك (publish):</p>
+<pre><span class="c"># 1. انسخ الملف لـ database/migrations</span>
+php artisan vendor:publish --tag=sanctum-migrations
+
+<span class="c"># 2. شوف شن بيتنفذ بدون ما يتنفذ</span>
+php artisan migrate --pretend
+
+<span class="c"># 3. نفّذ (الملفات الجديدة بس)</span>
+php artisan migrate
+
+<span class="c"># 4. تأكد: لازم تلقى create_personal_access_tokens_table = Ran</span>
+php artisan migrate:status</pre>
+<div class="warn"><b>انتبه:</b> الـ <code>.env</code> يأشّر على داتا بيس السيرفر (عن طريق التانل على port 55000). و<code>migrate</code> العادي ما يعدّلش جدول <code>users</code> اللي تشغّل من قبل. لو تبي الأعمدة الجديدة (<code>is_active</code> وغيرها) تدخل، لازم <code>migrate:fresh</code>، وهذا <b>يمسح كل البيانات</b>.</div>
+<p>موديل <code>User</code> فيه <code>HasApiTokens</code> من قبل، فما تحتاجش تزيد شي ثاني باش يشتغل <code>createToken()</code>.</p>
+
+<h2>3. أعمدة الجدول</h2>
+<pre>Schema::create(<span class="s">'personal_access_tokens'</span>, function (Blueprint $table) {
+    $table->id();
+    $table->morphs(<span class="s">'tokenable'</span>);                <span class="c">// tokenable_type + tokenable_id</span>
+    $table->text(<span class="s">'name'</span>);                       <span class="c">// 'flutter' أو 'react'</span>
+    $table->string(<span class="s">'token'</span>, 64)->unique();      <span class="c">// sha256 امتاع التوكن، مش التوكن نفسه</span>
+    $table->text(<span class="s">'abilities'</span>)->nullable();      <span class="c">// ["inspector"]</span>
+    $table->timestamp(<span class="s">'last_used_at'</span>)->nullable();
+    $table->timestamp(<span class="s">'expires_at'</span>)->nullable()->index();
+    $table->timestamps();
+});</pre>
+<table>
+  <tr><th>العمود</th><th>شن يخزّن</th><th>مثال</th></tr>
+  <tr><td><code>id</code></td><td>رقم الصف، وهو نفس الرقم قبل <code>|</code> في التوكن</td><td><code>12</code></td></tr>
+  <tr><td><code>tokenable_type</code></td><td>أنهي موديل صاحب التوكن</td><td><code>App\Models\User</code></td></tr>
+  <tr><td><code>tokenable_id</code></td><td>رقم صاحب التوكن في جدوله</td><td><code>5</code></td></tr>
+  <tr><td><code>name</code></td><td>الاسم اللي تعطيه في <code>createToken()</code></td><td><code>flutter</code></td></tr>
+  <tr><td><code>token</code></td><td><b>hash</b> للنص، فلو حد سرق الداتا بيس ما يقدرش يستعمله</td><td><code>a3f9…</code> (64 حرف)</td></tr>
+  <tr><td><code>abilities</code></td><td>صلاحيات التوكن (JSON)</td><td><code>["inspector"]</code></td></tr>
+  <tr><td><code>last_used_at</code></td><td>آخر مرة استُعمل فيها</td><td>يتحدّث مع كل طلب</td></tr>
+  <tr><td><code>expires_at</code></td><td>متى ينتهي (<code>null</code> = ما ينتهيش)</td><td><code>2026-12-25 10:00</code></td></tr>
+</table>
+
+<h2>4. <code>morphs</code> والعلاقة مع <code>users</code></h2>
+<p><code>$table->morphs('tokenable')</code> سطر واحد يعمل عمودين و index:</p>
+<pre>$table->morphs(<span class="s">'tokenable'</span>);
+
+<span class="c">// يساوي بالضبط:</span>
+$table->string(<span class="s">'tokenable_type'</span>);
+$table->unsignedBigInteger(<span class="s">'tokenable_id'</span>);
+$table->index([<span class="s">'tokenable_type'</span>, <span class="s">'tokenable_id'</span>]);</pre>
+<p><b>morph</b> معناها "يتشكّل". العمود <code>tokenable_id</code> ما يأشّرش على جدول ثابت، و<code>tokenable_type</code> هو اللي يحدد على أنهي جدول يأشّر. هذا اسمه <b>علاقة Polymorphic</b>.</p>
+
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<text class="th" x="120" y="46" text-anchor="middle">users</text>
+<text class="th" x="450" y="46" text-anchor="middle">personal_access_tokens</text>
+<text class="th" x="120" y="226" text-anchor="middle">devices (example only)</text>
+<rect class="box" x="40" y="60" width="160" height="32"/>
+<text class="ts" x="65" y="80" text-anchor="middle">id</text><text class="ts" x="145" y="80" text-anchor="middle">name</text>
+<rect class="teal" x="40" y="92" width="160" height="32"/><text class="th" x="65" y="112" text-anchor="middle">5</text><text class="t" x="145" y="112" text-anchor="middle">Ali</text>
+<rect class="teal" x="40" y="124" width="160" height="32"/><text class="th" x="65" y="144" text-anchor="middle">7</text><text class="t" x="145" y="144" text-anchor="middle">Sara</text>
+<rect class="box" x="40" y="236" width="160" height="32"/>
+<text class="ts" x="65" y="256" text-anchor="middle">id</text><text class="ts" x="145" y="256" text-anchor="middle">name</text>
+<rect class="coral" x="40" y="268" width="160" height="32"/><text class="th" x="65" y="288" text-anchor="middle">5</text><text class="t" x="145" y="288" text-anchor="middle">Scanner</text>
+<rect class="box" x="260" y="60" width="380" height="32"/>
+<text class="ts" x="280" y="80" text-anchor="middle">id</text><text class="ts" x="375" y="80" text-anchor="middle">tokenable_type</text><text class="ts" x="495" y="80" text-anchor="middle">tokenable_id</text><text class="ts" x="590" y="80" text-anchor="middle">name</text>
+<rect class="teal" x="260" y="92" width="380" height="32"/><text class="t" x="280" y="112" text-anchor="middle">1</text><text class="t" x="375" y="112" text-anchor="middle">App\Models\User</text><text class="th" x="495" y="112" text-anchor="middle">5</text><text class="t" x="590" y="112" text-anchor="middle">flutter</text>
+<rect class="teal" x="260" y="124" width="380" height="32"/><text class="t" x="280" y="144" text-anchor="middle">2</text><text class="t" x="375" y="144" text-anchor="middle">App\Models\User</text><text class="th" x="495" y="144" text-anchor="middle">5</text><text class="t" x="590" y="144" text-anchor="middle">react</text>
+<rect class="teal" x="260" y="156" width="380" height="32"/><text class="t" x="280" y="176" text-anchor="middle">3</text><text class="t" x="375" y="176" text-anchor="middle">App\Models\User</text><text class="th" x="495" y="176" text-anchor="middle">7</text><text class="t" x="590" y="176" text-anchor="middle">flutter</text>
+<rect class="coral" x="260" y="188" width="380" height="32"/><text class="t" x="280" y="208" text-anchor="middle">4</text><text class="t" x="375" y="208" text-anchor="middle">App\Models\Device</text><text class="th" x="495" y="208" text-anchor="middle">5</text><text class="t" x="590" y="208" text-anchor="middle">scanner</text>
+<line x1="258" y1="108" x2="204" y2="108" stroke="#0f6e56" stroke-width="1.5" marker-end="url(#a1)"/>
+<line x1="258" y1="140" x2="204" y2="116" stroke="#0f6e56" stroke-width="1.5" marker-end="url(#a1)"/>
+<line x1="258" y1="172" x2="204" y2="142" stroke="#0f6e56" stroke-width="1.5" marker-end="url(#a1)"/>
+<line x1="258" y1="206" x2="204" y2="280" stroke="#993c1d" stroke-width="1.5" marker-end="url(#a1)"/>
+<text class="ts" x="340" y="326" text-anchor="middle">tokenable_type picks the table, tokenable_id picks the row</text>
+</svg>
+</div>
+<div class="cap">الشكل 1: كل صف توكن يأشّر على صاحبه بعمودين</div>
+
+<ul>
+  <li>الصفوف 1 و2 و4 كلهم <code>tokenable_id = 5</code>، لكن 1 و2 لـ Ali، و4 للجهاز، لأن <code>tokenable_type</code> مختلف.</li>
+  <li>Ali عنده توكنين (flutter وreact)، وهذا معناه <b>1 لـ N</b>.</li>
+  <li>في مشروعنا ما فيش <code>devices</code>، فكل الصفوف بتكون <code>App\Models\User</code>. الجدول الوهمي هذا موجود بس باش تفهم ليش Sanctum عمل عمودين: هو مكتبة عامة، وما يعرفش أنهي موديلات عندك.</li>
+</ul>
+<div class="warn"><b>العيب:</b> لأن <code>tokenable_id</code> ما يأشّرش على جدول ثابت، الداتا بيس <b>ما تقدرش تعمل FOREIGN KEY</b>. فما فيش cascade، ولو انمسح user تبقى توكناته في الجدول. الحل في القسم 10.</div>
+
+<h2>5. العلاقة 1 لـ N في الكود</h2>
+<p>الـ trait <code>HasApiTokens</code> اللي في <code>User</code> فيه العلاقة جاهزة:</p>
+<pre><span class="c">// داخل HasApiTokens</span>
+public function tokens()
+{
+    return $this->morphMany(PersonalAccessToken::class, <span class="s">'tokenable'</span>);
+}</pre>
+<table>
+  <tr><th>الكود</th><th>الاستعلام اللي يتنفذ</th></tr>
+  <tr><td><code>$user->tokens</code></td><td><code>SELECT * FROM personal_access_tokens WHERE tokenable_type = 'App\Models\User' AND tokenable_id = 5</code></td></tr>
+  <tr><td><code>$user->tokens()->where('name','flutter')->delete()</code></td><td><code>DELETE … WHERE tokenable_type = … AND tokenable_id = 5 AND name = 'flutter'</code></td></tr>
+  <tr><td><code>$token->tokenable</code></td><td><code>SELECT * FROM users WHERE id = 5</code> (يعرف الجدول من <code>tokenable_type</code>)</td></tr>
+</table>
+<p>هي <code>hasMany</code> عادية، لكن الـ WHERE فيها شرطين بدل شرط واحد.</p>
+
+<h2>6. <code>abilities</code> (الصلاحيات)</h2>
+<p>قائمة كلمات على <b>التوكن نفسه</b>، تقول "التوكن هذا يقدر يدير شن". تتخزّن JSON:</p>
+<pre>$user->createToken(<span class="s">'flutter'</span>, [<span class="s">'inspector'</span>]);   <span class="c">// abilities = ["inspector"]</span>
+$user->createToken(<span class="s">'test'</span>);                    <span class="c">// abilities = ["*"]  يعني كل شي</span>
+
+<span class="c">// الفحص في الكود</span>
+if ($request->user()->tokenCan(<span class="s">'inspector'</span>)) { ... }
+
+<span class="c">// أو في الـ route</span>
+Route::post(<span class="s">'/visits'</span>, [VisitController::class, <span class="s">'store'</span>])
+    ->middleware([<span class="s">'auth:sanctum'</span>, <span class="s">'ability:inspector'</span>]);
+
+<span class="c">// تسجيل الـ middleware مرة وحدة في bootstrap/app.php</span>
+$middleware->alias([
+    <span class="s">'abilities'</span> => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,     <span class="c">// لازم الكل</span>
+    <span class="s">'ability'</span>   => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class, <span class="c">// يكفي واحد</span>
+]);</pre>
+<table>
+  <tr><th></th><th><code>users.role</code></th><th><code>abilities</code></th></tr>
+  <tr><td>مكانه</td><td>على <b>المستخدم</b></td><td>على <b>التوكن</b></td></tr>
+  <tr><td>يتغيّر</td><td>لما الأدمن يغيّره</td><td>ثابت لين ينمسح التوكن</td></tr>
+  <tr><td>يعني</td><td>"انت مين"</td><td>"التوكن هذا شن يقدر يدير"</td></tr>
+</table>
+<div class="note"><b>مثال:</b> مشرف تعطيه توكن للتقارير بس: <code>createToken('export', ['reports:read'])</code>. لو اتسرق، اللي سرقه يقرا التقارير بس، رغم أن صاحبه مشرف.</div>
+<div class="warn"><b>انتبه:</b> لو غيّرت <code>role</code> المستخدم، توكناته القديمة تبقى بالـ abilities القديمة. امسحها (<code>$user->tokens()->delete()</code>)، أو افحص <code>users.role</code> نفسه في middleware. في مشروعنا، فحص <code>role</code> يكفي، و<code>abilities</code> طبقة زيادة.</div>
+
+<h2>7 و8. الـ flow كامل: login وبعده أي طلب</h2>
+
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 700" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect class="purple" x="40" y="30" width="140" height="44" rx="8"/><text class="th" x="110" y="57" text-anchor="middle">Flutter app</text>
+<rect class="purple" x="260" y="30" width="160" height="44" rx="8"/><text class="th" x="340" y="57" text-anchor="middle">Laravel + Sanctum</text>
+<rect class="purple" x="500" y="30" width="140" height="44" rx="8"/><text class="th" x="570" y="57" text-anchor="middle">PostgreSQL</text>
+<line class="life" x1="110" y1="74" x2="110" y2="690"/><line class="life" x1="340" y1="74" x2="340" y2="690"/><line class="life" x1="570" y1="74" x2="570" y2="690"/>
+<text class="th" x="225" y="100" text-anchor="middle">Login (once)</text>
+<text class="ts" x="225" y="122" text-anchor="middle">POST /login  email + password</text>
+<line class="arr" x1="112" y1="130" x2="336" y2="130" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="164" text-anchor="middle">SELECT users WHERE email = ?</text>
+<line class="arr" x1="342" y1="172" x2="566" y2="172" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="206" text-anchor="middle">user id = 5</text>
+<line class="arr" x1="568" y1="214" x2="344" y2="214" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+<rect class="amber" x="140" y="230" width="180" height="30" rx="4"/><text class="ts" x="230" y="249" text-anchor="middle">Hash::check, is_active, role</text>
+<text class="ts" x="455" y="248" text-anchor="middle">INSERT token (User, 5, sha256)</text>
+<line class="arr" x1="342" y1="256" x2="566" y2="256" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="290" text-anchor="middle">new row id = 12</text>
+<line class="arr" x1="568" y1="298" x2="344" y2="298" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+<text class="ts" x="225" y="332" text-anchor="middle">12|abc...  (plain, shown once)</text>
+<line class="arr" x1="338" y1="340" x2="114" y2="340" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+<line x1="40" y1="384" x2="640" y2="384" stroke="#b4b2a9" stroke-width=".8" stroke-dasharray="2 4"/>
+<text class="th" x="225" y="374" text-anchor="middle">Every request after</text>
+<text class="ts" x="225" y="412" text-anchor="middle">GET /me  Bearer 12|abc...</text>
+<line class="arr" x1="112" y1="420" x2="336" y2="420" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="454" text-anchor="middle">SELECT token WHERE id = 12</text>
+<line class="arr" x1="342" y1="462" x2="566" y2="462" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="496" text-anchor="middle">hash, User, 5, expires_at</text>
+<line class="arr" x1="568" y1="504" x2="344" y2="504" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+<rect class="amber" x="140" y="518" width="180" height="30" rx="4"/><text class="ts" x="230" y="537" text-anchor="middle">sha256(abc) == hash ?</text>
+<text class="ts" x="455" y="538" text-anchor="middle">SELECT users WHERE id = 5</text>
+<line class="arr" x1="342" y1="546" x2="566" y2="546" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="580" text-anchor="middle">Ali</text>
+<line class="arr" x1="568" y1="588" x2="344" y2="588" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+<text class="ts" x="455" y="622" text-anchor="middle">UPDATE last_used_at = now()</text>
+<line class="arr" x1="342" y1="630" x2="566" y2="630" marker-end="url(#a2)"/>
+<text class="ts" x="225" y="664" text-anchor="middle">200  $request-&gt;user() = Ali</text>
+<line class="arr" x1="338" y1="672" x2="114" y2="672" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+</svg>
+</div>
+<div class="cap">الشكل 2: كل سهم طلب أو استعلام، بالترتيب من فوق لتحت. الأسهم المتقطعة ردود.</div>
+
+<h3>7. الـ login (مرة وحدة)</h3>
+<ol class="steps">
+  <li>التطبيق يبعث الإيميل وكلمة السر لـ <code>POST /login</code>.</li>
+  <li>Laravel يجيب المستخدم: <code>User::where('email', …)->first()</code>.</li>
+  <li>يفحص بالترتيب: كلمة السر (<code>Hash::check</code>) ← 401، بعدين <code>is_active</code> ← 403، بعدين الـ role يناسب التطبيق ← 403.</li>
+  <li><code>createToken('flutter')</code> يولّد نص عشوائي طويل (نسمّوه <code>abc...</code>).</li>
+  <li>يخزّن <b>الـ hash بس</b> (<code>sha256(abc)</code>) مع <code>User</code> و<code>5</code>، والداتا بيس تعطيه <code>id = 12</code>.</li>
+  <li>يرجّع <code>12|abc...</code>. هذي <b>المرة الوحيدة</b> اللي النص الأصلي يطلع فيها. التطبيق يحفظه في secure storage.</li>
+</ol>
+<pre>$user = User::where(<span class="s">'email'</span>, $request->email)->first();
+
+if (! $user || ! Hash::check($request->password, $user->password)) {
+    return response()->json([<span class="s">'message'</span> => <span class="s">'Invalid login credentials'</span>], <span class="d">401</span>);
+}
+if (! $user->is_active) {
+    return response()->json([<span class="s">'message'</span> => <span class="s">'Account disabled'</span>], <span class="d">403</span>);
+}
+if ($user->role !== <span class="s">'inspector'</span>) {                        <span class="c">// login امتاع Flutter</span>
+    return response()->json([<span class="s">'message'</span> => <span class="s">'Not allowed in this app'</span>], <span class="d">403</span>);
+}
+
+$user->tokens()->where(<span class="s">'name'</span>, <span class="s">'flutter'</span>)->delete();        <span class="c">// جلسة وحدة لكل تطبيق (اختياري)</span>
+$token = $user->createToken(<span class="s">'flutter'</span>, [$user->role])->plainTextToken;
+$user->forceFill([<span class="s">'last_login_at'</span> => now()])->save();</pre>
+
+<h3>8. أي طلب بعد الـ login (يديره <code>auth:sanctum</code> بروحه)</h3>
+<ol class="steps">
+  <li>التطبيق يبعث الهيدر <code>Authorization: Bearer 12|abc...</code>.</li>
+  <li>Sanctum يقسم التوكن عند <code>|</code>: الـ id هو <code>12</code> والنص هو <code>abc...</code>.</li>
+  <li>يجيب الصف بالـ primary key مباشرة (<code>WHERE id = 12</code>)، فهو سريع وما يدوّرش في كل الجدول.</li>
+  <li>يحسب <code>sha256(abc)</code> ويقارنه بعمود <code>token</code>. لو مختلف، أو <code>expires_at</code> فات، يرجّع <b>401</b>.</li>
+  <li>من نفس الصف يقرا <code>tokenable_type</code> و<code>tokenable_id</code>، فيجيب المستخدم من <code>users</code>. <b>هنا يصير الربط بين الجدولين.</b></li>
+  <li>يحدّث <code>last_used_at</code>، ويوصل الطلب للكنترولر.</li>
+</ol>
+<pre>Route::middleware(<span class="s">'auth:sanctum'</span>)->get(<span class="s">'/me'</span>, function (Request $request) {
+    $request->user();                          <span class="c">// Ali (من users)</span>
+    $request->user()->currentAccessToken();    <span class="c">// الصف 12 (من personal_access_tokens)</span>
+});</pre>
+
+<h2>9. الـ logout والإيقاف</h2>
+<table>
+  <tr><th>الحالة</th><th>الكود</th><th>الاستعلام</th></tr>
+  <tr><td>خروج من الجهاز هذا</td><td><code>$request->user()->currentAccessToken()->delete()</code></td><td><code>DELETE … WHERE id = 12</code></td></tr>
+  <tr><td>خروج من تطبيق معيّن</td><td><code>$user->tokens()->where('name','flutter')->delete()</code></td><td><code>… AND name = 'flutter'</code></td></tr>
+  <tr><td>خروج من كل الأجهزة (إيقاف حساب، تغيير role أو كلمة سر)</td><td><code>$user->tokens()->delete()</code></td><td><code>DELETE … WHERE tokenable_type = … AND tokenable_id = 5</code></td></tr>
+</table>
+<p>بعد ما ينمسح الصف، أي طلب بـ <code>12|abc...</code> يفشل في الخطوة 3 من القسم 8، لأن الصف مش موجود، فيرجّع 401.</p>
+<div class="note"><b>الإيقاف (<code>is_active = false</code>):</b> امسح توكناته في نفس اللحظة، وخلّي middleware (<code>EnsureUserIsActive</code>) يفحص <code>is_active</code> مع كل طلب كحماية ثانية.</div>
+
+<h2>10. ربط حقيقي بـ cascade (اختياري)</h2>
+<p>لأن عندنا موديل واحد بس عنده توكنات (<code>User</code>)، تقدر تبدّل <code>morphs</code> بـ FK حقيقي في <b>الملف اللي انعمله publish</b> (مش اللي في <code>vendor</code>):</p>
+<pre><span class="d">-   $table->morphs('tokenable');</span>
+<span class="s">+   $table->string('tokenable_type');</span>
+<span class="s">+   $table->foreignId('tokenable_id')->constrained('users')->cascadeOnDelete();</span>
+<span class="s">+   $table->index(['tokenable_type', 'tokenable_id']);</span></pre>
+<ul>
+  <li><code>tokenable_type</code> لازم يبقى، لأن Sanctum يستعمله في الاستعلام.</li>
+  <li>الآن لو انمسح user، الداتا بيس تمسح توكناته معاه.</li>
+  <li>الملف لازم يجي <b>بعد</b> ملف <code>users</code> في الترتيب. الـ publish يعطيه تاريخ اليوم، فهو بعده.</li>
+</ul>
+
+<h2>11. الأمان وأكواد الرد</h2>
+<table>
+  <tr><th>الكود</th><th>المعنى</th><th>متى</th></tr>
+  <tr><td><b>401</b></td><td>"ما نعرفكش"</td><td>كلمة سر غلط، توكن مش موجود أو انتهى</td></tr>
+  <tr><td><b>403</b></td><td>"نعرفك، لكن ممنوع"</td><td>حساب موقوف، role غلط، ability ناقصة</td></tr>
+  <tr><td><b>422</b></td><td>البيانات ناقصة أو غلط</td><td>فشل <code>validate()</code></td></tr>
+  <tr><td><b>429</b></td><td>محاولات ياسر</td><td><code>throttle</code> على route الـ login</td></tr>
+</table>
+<ul>
+  <li>الداتا بيس فيها <b>hash التوكن بس</b>، فلو اتسرّبت، التوكنات ما تشتغلش.</li>
+  <li>فحص <code>is_active</code> والـ role يجي <b>بعد</b> كلمة السر، باش ما تكشفش حالة الحساب لحد ما يعرفش كلمة السر.</li>
+  <li>حط <code>->middleware('throttle:5,1')</code> على الـ login (5 محاولات في الدقيقة).</li>
+  <li>لو تبي التوكنات تنتهي بروحها، حط <code>'expiration' => 60 * 24 * 30</code> (بالدقايق) في <code>config/sanctum.php</code>، أو مرّر تاريخ في <code>createToken(..., expiresAt: now()->addDays(30))</code>.</li>
+  <li>في Flutter خزّن التوكن في <code>flutter_secure_storage</code> مش <code>SharedPreferences</code>.</li>
+</ul>
+
+<h2>12. الخلاصة</h2>
+<table>
+  <tr><th>السؤال</th><th>الجواب</th></tr>
+  <tr><td>كيف ينعمل الجدول؟</td><td><code>vendor:publish --tag=sanctum-migrations</code> بعدين <code>migrate</code></td></tr>
+  <tr><td>كيف مربوط بـ users؟</td><td><code>tokenable_type</code> (أنهي جدول) + <code>tokenable_id</code> (أنهي صف)</td></tr>
+  <tr><td>نوع العلاقة؟</td><td>1 لـ N: user واحد عنده توكنات ياسر (جهاز، تطبيق)</td></tr>
+  <tr><td>شن يتخزّن؟</td><td>hash التوكن بس، والنص الأصلي يطلع مرة وحدة</td></tr>
+  <tr><td>كيف Sanctum يلقى الصف؟</td><td>بالرقم قبل <code>|</code> (primary key)، بعدين يقارن الـ hash</td></tr>
+  <tr><td>abilities؟</td><td>صلاحيات على التوكن، و<code>role</code> صلاحيات على المستخدم</td></tr>
+  <tr><td>logout؟</td><td>مسح الصف: <code>currentAccessToken()->delete()</code></td></tr>
+  <tr><td>المستخدم انمسح؟</td><td>مع <code>morphs</code> توكناته تبقى، ومع FK + cascade تنمسح</td></tr>
+</table>
+
+</body>
+</html>
